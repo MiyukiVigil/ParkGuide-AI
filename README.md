@@ -1,127 +1,205 @@
-# ParkGuideAI: Plant Interaction Detection Prototype
+# Sarawak Park Guide - AI Activity Detection Module
 
-AI-powered monitoring system to detect abnormal plant interactions in park guiding scenarios.
+This module trains, evaluates, and runs a YOLO activity detection model for park guide monitoring.
+
+## Current Classes
+
+The current dataset has **3 classes only**:
+
+| Class ID | Class | Alert Type |
+|---|---|---|
+| 0 | `plant_plucking` | Violation |
+| 1 | `animal_touching` | Violation |
+| 2 | `plant_approaching` | Risk |
+
+Future class to add later:
+
+| Class | Alert Type |
+|---|---|
+| `animal_approaching` | Risk | 
+
 
 ## Project Structure
 
-```
-ParkGuideAI/
-├── src/                          # Source code
-│   ├── app.py                   # Main Gradio UI launcher
-│   ├── training.py              # Training pipeline
-│   └── modules/
-│       ├── test.py              # Single image inference
-│       ├── video_test.py        # Video monitoring with alerts
-│       ├── show_results.py      # Result visualization
-│       └── image_aug.py         # Data augmentation utilities
-├── models/                      # Trained model checkpoints
-│   ├── plant_model.pth
-│   └── plant_model.json
-├── data/                        # Datasets and samples
-│   ├── samples/
-│   │   └── test.jpg
-│   └── Datasets/ (from repo)
-├── docs/                        # Documentation
-│   ├── SCOPE_ALIGNMENT.md
-│   └── Project Scope.pdf
-├── output/                      # Training and inference outputs
-│   └── results/
-│       ├── loss_curve.png
-│       ├── accuracy_curve.png
-│       ├── confusion_matrix.png
-│       ├── metrics.json
-│       └── ui_runs/
-├── Datasets/                    # Original training data
-├── results/ (legacy)            # Legacy results directory
-├── run.py                       # Main launcher
-└── venv/                        # Python virtual environment
+```text
+ParkGuide-AI/
+├── dataset/
+│   ├── images/
+│   │   ├── train/
+│   │   └── val/
+│   └── labels/
+│       ├── train/
+│       └── val/
+├── alerts/
+├── runs/
+│   └── train/
+│       └── park_activity_v2/
+│           ├── weights/
+│           │   └── best.pt
+│           ├── results.png
+│           └── confusion_matrix.png
+├── dataset.yaml
+├── training.py
+├── evaluate.py
+├── detect.py
+├── requirements.txt
+└── README.md
 ```
 
-## Quick Start
+## Setup
 
-### 1. Launch the UI
+Create and activate a virtual environment:
+
 ```bash
-python run.py
+python3 -m venv venv
+source venv/bin/activate
 ```
-Open the URL shown in terminal (typically http://localhost:7860)
 
-### 2. Tabs Available
+Install dependencies:
 
-**Train Tab:**
-- Configure hyperparameters (epochs, batch size, learning rate, etc.)
-- Click "Start Training" to train the model
-- View real-time training log
+```bash
+pip install -r requirements.txt
+```
 
-**Results Tab:**
-- View latest metrics (accuracy, F1, per-class performance)
-- See training curves (loss and accuracy over epochs)
-- View confusion matrix
+## Dataset
 
-**Image Prediction Tab:**
-- Upload a single image
-- Get real-time prediction with confidence score
+Dataset is on google drive
+Link: https://drive.google.com/file/d/1YZ4FLO9Zc4Cm8NiazAxC6Tl402ybwfS4/view?usp=sharing
 
-**Video Monitoring Tab:**
-- Upload a video file
-- Set alert confidence threshold
-- Process frames with real-time detection
-- Download annotated video with alerts
-- View alert events in table format
-- Access evidence frames
+The dataset is configured in `dataset.yaml`:
 
-## Model Performance
+```yaml
+path: dataset
 
-**Latest Run Metrics:**
-- Overall Accuracy: 93.39%
-- Macro F1: 0.9328
-- Classes:
-  - NoInteraction: P=0.968, R=1.000, F1=0.984
-  - Approaching: P=0.882, R=0.968, F1=0.923
-  - Touching: P=1.000, R=0.800, F1=0.889
-  - Plucking: P=0.906, R=0.967, F1=0.935
+train: images/train
+val: images/val
 
-## Classes Detected
+names:
+  0: plant_plucking
+  1: animal_touching
+  2: plant_approaching
+```
 
-1. **NoInteraction** - No interaction with plant
-2. **Approaching** - Moving toward the plant
-3. **Touching** - Making contact with plant
-4. **Plucking** - Attempting to pick/damage plant
+Dataset folder structure:
 
-## Training Data
+```text
+dataset/images/train/
+dataset/images/val/
+dataset/labels/train/
+dataset/labels/val/
+```
 
-- Total: 605 images
-- Distribution:
-  - NoInteraction: 150 images
-  - Approaching: 155 images
-  - Touching: 150 images
-  - Plucking: 150 images
+Each image needs a matching YOLO `.txt` label file with the same filename.
 
-## Technical details
+YOLO label format:
 
-- **Model**: ResNet18 (pretrained on ImageNet)
-- **Input Size**: 224x224
-- **Optimization**: AdamW with ReduceLROnPlateau scheduler
-- **Loss**: CrossEntropyLoss with label smoothing
-- **Class Balancing**: Weighted random sampler
-- **Validation**: Stratified train/val split (80/20)
-- **Device**: CUDA GPU (falls back to CPU)
+```text
+<class_id> <x_center> <y_center> <width> <height>
+```
 
-## Scope Alignment
+Example:
 
-This prototype implements the AI-based abnormal activity detection module of the broader Digital Park Guide Training Platform. See [SCOPE_ALIGNMENT.md](docs/SCOPE_ALIGNMENT.md) for mapping to full project scope.
+```text
+0 0.512 0.430 0.280 0.350
+```
 
-## Requirements
+Class `0` is `plant_plucking`.
 
-- Python 3.14+
-- PyTorch with CUDA support (GPU recommended)
-- gradio, opencv-python, torchvision, matplotlib, numpy
-- See venv/... for full dependency list
+## Training
 
-## File Organization Benefits
+Run:
 
-- **src/** - All executable code in one place
-- **models/** - Centralized checkpoint storage
-- **data/** - Clean separation of datasets and samples
-- **docs/** - Documentation and project scope
-- **output/** - All results neatly organized
-- **Datasets/** - Original training data (outside src)
+```bash
+python3 training.py
+```
+
+Current training settings:
+
+```python
+MODEL_BASE = "yolo11s.pt" for second training
+EPOCHS = 90
+IMG_SIZE = 640
+BATCH_SIZE = 8
+RUN_NAME = "park_activity_v2"
+```
+
+Best model output:
+
+```text
+runs/train/park_activity_v2/weights/best.pt
+```
+
+## Evaluation
+
+Run:
+
+```bash
+python3 evaluate.py
+```
+
+## Detection
+
+Run detection on one uploaded image or video file:
+
+```bash
+python3 detect.py --source path/to/image.jpg
+```
+
+To test a video file:
+
+```bash
+python3 detect.py --source path/to/video.mp4
+```
+
+To change confidence:
+
+```bash
+python3 detect.py --source path/to/image.jpg --confidence 0.50
+```
+
+Annotated results are saved under:
+
+```text
+runs/detect/
+```
+
+Admin violation alerts are saved to:
+
+```text
+alerts/alert_log.txt
+```
+
+Risk detections are printed in the terminal for the park guide only.
+They are not written to the admin alert log since it is just a risk.
+
+Alert behavior:
+
+| Class | Output Behavior |
+|---|---|
+| `plant_approaching` | Risk notice for park guide only |
+| `plant_plucking` | Violation alert sent to admin log |
+| `animal_touching` | Violation alert sent to admin log |
+
+## For Teammates
+
+To use this project:
+
+```bash
+git clone <repo-url>
+cd ParkGuide-AI
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 training.py
+python3 evaluate.py
+python3 detect.py
+```
+
+If the trained `best.pt` is shared in the repo, skip training and run `evaluate.py` or `detect.py` directly.
+
+For the `last.pt` is for the latest/recent, just for resume training purpose if needed.
+
+
+
+
+

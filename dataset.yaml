@@ -1,0 +1,9 @@
+path: dataset
+
+train: images/train
+val: images/val
+
+names:
+  0: plant_plucking
+  1: animal_touching
+  2: plant_approaching
