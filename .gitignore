@@ -1,6 +1,19 @@
-Datasets
-docs
-models
-output
-__pycache__']
-venv
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Dataset files
+dataset/
+Datasets/
+
+# Training outputs
+output/
+models/
+
+# Optional generated docs
+docs/
