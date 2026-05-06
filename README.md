@@ -4,19 +4,14 @@ This module trains, evaluates, and runs a YOLO activity detection model for park
 
 ## Current Classes
 
-The current dataset has **3 classes only**:
+The current dataset has **4 classes**:
 
 | Class ID | Class | Alert Type |
 |---|---|---|
 | 0 | `plant_plucking` | Violation |
 | 1 | `animal_touching` | Violation |
 | 2 | `plant_approaching` | Risk |
-
-Future class to add later:
-
-| Class | Alert Type |
-|---|---|
-| `animal_approaching` | Risk | 
+| 3 | `normal_activity` | No alert |
 
 
 ## Project Structure
@@ -83,6 +78,7 @@ names:
   0: plant_plucking
   1: animal_touching
   2: plant_approaching
+  3: normal_activity
 ```
 
 Dataset folder structure:
@@ -185,6 +181,7 @@ Alert behavior:
 | `plant_approaching` | Risk notice for park guide only |
 | `plant_plucking` | Violation alert sent to admin log |
 | `animal_touching` | Violation alert sent to admin log |
+| `normal_activity` | No alert |
 
 ## For Teammates
 
@@ -206,7 +203,6 @@ If the trained `best.pt` is shared in the repo, skip training and run `evaluate.
 `detect.py` and `evaluate.py` are linked to `latest_training/best.pt`. After training, `training.py` copies the newest best weights there automatically.
 
 `last.pt` is only for resuming training if needed.
-
 
 
 
