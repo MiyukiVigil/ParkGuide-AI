@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 import yaml
 from ultralytics import YOLO
@@ -15,6 +16,7 @@ IMG_SIZE     = 768
 BATCH_SIZE   = -1
 PROJECT_DIR  = BASE_DIR / "runs/train"
 RUN_NAME     = "park_activity_yolo11m"
+LATEST_MODEL = BASE_DIR / "latest_training/best.pt"
 # -----------------------------------------------------------
 
 def _resolve_dataset_path(dataset_config: dict, yaml_path: Path) -> Path:
@@ -136,7 +138,12 @@ def main():
 
     print("\n[3/3] Training complete!")
     best_weights = PROJECT_DIR / RUN_NAME / "weights/best.pt"
+    if best_weights.exists():
+        LATEST_MODEL.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(best_weights, LATEST_MODEL)
+
     print(f"      Best model saved to: {best_weights}")
+    print(f"      Linked latest model at: {LATEST_MODEL}")
     print("\nNext step: run  python evaluate.py  to check accuracy.")
     print("           run  python detect.py    to test on video/camera.")
 

@@ -31,9 +31,14 @@ ParkGuide-AI/
 │       ├── train/
 │       └── val/
 ├── alerts/
+├── latest_training/
+│   ├── best.pt
+│   └── v2_results/
+│       ├── results.png
+│       └── confusion_matrix.png
 ├── runs/
 │   └── train/
-│       └── park_activity_v2/
+│       └── park_activity_yolo11m/
 │           ├── weights/
 │           │   └── best.pt
 │           ├── results.png
@@ -64,7 +69,7 @@ pip install -r requirements.txt
 ## Dataset
 
 Dataset is on google drive
-Link: https://drive.google.com/file/d/1YZ4FLO9Zc4Cm8NiazAxC6Tl402ybwfS4/view?usp=sharing
+Link: https://drive.google.com/file/d/1oFQGFHFl1LNuRAC3OGkw7rPSsRJGbg1Z/view?usp=sharing
 
 The dataset is configured in `dataset.yaml`:
 
@@ -116,17 +121,18 @@ python3 training.py
 Current training settings:
 
 ```python
-MODEL_BASE = "yolo11s.pt" for second training
-EPOCHS = 90
-IMG_SIZE = 640
-BATCH_SIZE = 8
-RUN_NAME = "park_activity_v2"
+MODEL_BASE = "yolo11m.pt"
+EPOCHS = 120
+IMG_SIZE = 768
+BATCH_SIZE = -1
+RUN_NAME = "park_activity_yolo11m"
 ```
 
 Best model output:
 
 ```text
-runs/train/park_activity_v2/weights/best.pt
+runs/train/park_activity_yolo11m/weights/best.pt
+latest_training/best.pt
 ```
 
 ## Evaluation
@@ -197,8 +203,9 @@ python3 detect.py
 
 If the trained `best.pt` is shared in the repo, skip training and run `evaluate.py` or `detect.py` directly.
 
-For the `last.pt` is for the latest/recent, just for resume training purpose if needed.
+`detect.py` and `evaluate.py` are linked to `latest_training/best.pt`. After training, `training.py` copies the newest best weights there automatically.
 
+`last.pt` is only for resuming training if needed.
 
 
 
