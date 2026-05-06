@@ -4,11 +4,13 @@ from datetime import datetime
 from pathlib import Path
 import os
 
+BASE_DIR = Path(__file__).resolve().parent
+
 # -- Configuration ------------------------------------------
-MODEL_PATH = "runs/train/park_activity_v2/weights/best.pt"
+MODEL_PATH = BASE_DIR / "latest_training/best.pt"
 CONFIDENCE = 0.35
-ALERT_LOG = "alerts/alert_log.txt"
-OUTPUT_DIR = "runs/detect"
+ALERT_LOG = BASE_DIR / "alerts/alert_log.txt"
+OUTPUT_DIR = BASE_DIR / "runs/detect"
 
 VIOLATION_CLASSES = {
     "plant_plucking",
@@ -64,7 +66,7 @@ def format_detection_message(class_name: str, alert_level: str, confidence: floa
 
 
 def log_violation_alert(class_name: str, confidence: float, frame_number: int):
-    os.makedirs("alerts", exist_ok=True)
+    os.makedirs(ALERT_LOG.parent, exist_ok=True)
     message = format_detection_message(class_name, "VIOLATION", confidence, frame_number)
     print(f"\n{message}")
     with open(ALERT_LOG, "a", encoding="utf-8") as file:
@@ -104,7 +106,7 @@ def main():
     print("  Sarawak Park Guide - Activity Detection")
     print("=" * 60)
 
-    if not Path(MODEL_PATH).exists():
+    if not MODEL_PATH.exists():
         print(f"\n[ERROR] Model not found at: {MODEL_PATH}")
         print("Please run python3 training.py first.")
         return
@@ -134,7 +136,7 @@ def main():
         source=str(source),
         conf=args.confidence,
         save=True,
-        project=OUTPUT_DIR,
+        project=str(OUTPUT_DIR),
         name=source.stem,
         exist_ok=True,
         verbose=False,

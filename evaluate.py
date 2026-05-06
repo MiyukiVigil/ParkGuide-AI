@@ -8,7 +8,7 @@ except ModuleNotFoundError:
 BASE_DIR = Path(__file__).resolve().parent
 
 # -- Configuration ------------------------------------------
-MODEL_PATH   = BASE_DIR / "runs/train/park_activity_v2/weights/best.pt"
+MODEL_PATH   = BASE_DIR / "latest_training/best.pt"
 DATASET_YAML = BASE_DIR / "dataset.yaml"
 IMG_SIZE     = 640
 # -----------------------------------------------------------
@@ -20,6 +20,7 @@ def find_model_path():
         return configured_path
 
     search_roots = [
+        BASE_DIR / "latest_training",
         BASE_DIR / "runs/train",
         Path("/opt/homebrew/runs/detect/runs/train"),
     ]
@@ -27,6 +28,7 @@ def find_model_path():
     trained_models = []
     for search_root in search_roots:
         if search_root.exists():
+            trained_models.extend(search_root.glob("best.pt"))
             trained_models.extend(search_root.glob("*/weights/best.pt"))
 
     trained_models = sorted(
@@ -82,7 +84,7 @@ def main():
         print("  python3 training.py")
         print("\nNote: yolov8n.pt is only the pretrained base model.")
         print("After training finishes, YOLO should create:")
-        print(f"  {BASE_DIR / 'runs/train/park_activity_v2/weights/best.pt'}")
+        print(f"  {BASE_DIR / 'latest_training/best.pt'}")
         return
 
     print(f"\nLoading model : {model_path}")
