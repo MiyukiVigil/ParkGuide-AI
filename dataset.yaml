@@ -7,3 +7,4 @@ names:
   0: plant_plucking
   1: animal_touching
   2: plant_approaching
+  3: normal_activity

@@ -21,7 +21,11 @@ RISK_CLASSES = {
     "plant_approaching",
 }
 
-EXPECTED_CLASSES = RISK_CLASSES | VIOLATION_CLASSES
+NORMAL_CLASSES = {
+    "normal_activity",
+}
+
+EXPECTED_CLASSES = RISK_CLASSES | VIOLATION_CLASSES | NORMAL_CLASSES
 
 
 def parse_args():
@@ -121,7 +125,7 @@ def main():
     missing_classes = sorted(EXPECTED_CLASSES - set(class_names))
 
     if missing_classes:
-        print("\n[WARNING] This model does not include all 3 expected classes:")
+        print(f"\n[WARNING] This model does not include all {len(EXPECTED_CLASSES)} expected classes:")
         for class_name in missing_classes:
             print(f"  - {class_name}")
         print("Retrain with an updated dataset.yaml if you need these classes detected.")
