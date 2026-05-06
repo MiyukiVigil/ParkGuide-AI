@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 
 # -- Configuration ------------------------------------------
-MODEL_PATH = "runs/train/park_activity_v2/weights/best.pt"
+MODEL_PATH = "latest_training/best.pt"
 CONFIDENCE = 0.35
 ALERT_LOG = "alerts/alert_log.txt"
 OUTPUT_DIR = "runs/detect"

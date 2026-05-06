@@ -6,14 +6,15 @@ from ultralytics import YOLO
 BASE_DIR = Path(__file__).resolve().parent
 
 # -- Configuration ------------------------------------------
-MODEL_BASE   = "yolo11s.pt"   # YOLO11 small pretrained model
+# Accuracy-focused default. Use yolo11s.pt if training is too slow or runs out of memory.
+MODEL_BASE   = "yolo11m.pt"
 
 DATASET_YAML = BASE_DIR / "dataset.yaml"
-EPOCHS       = 90           
-IMG_SIZE     = 640            
-BATCH_SIZE   = 8        
+EPOCHS       = 120
+IMG_SIZE     = 768
+BATCH_SIZE   = -1
 PROJECT_DIR  = BASE_DIR / "runs/train"
-RUN_NAME     = "park_activity_v2"
+RUN_NAME     = "park_activity_yolo11m"
 # -----------------------------------------------------------
 
 def _resolve_dataset_path(dataset_config: dict, yaml_path: Path) -> Path:
@@ -112,17 +113,20 @@ def main():
         project   = str(PROJECT_DIR),
         name      = RUN_NAME,
 
-        # Data augmentation — these are auto-applied to fight overfitting
+        # Accuracy-focused augmentation: enough variation without distorting actions too much.
         augment   = True,
-        flipud    = 0.3,       # Vertical flip 30% of the time
+        flipud    = 0.0,       # People/plants should stay upright
         fliplr    = 0.5,       # Horizontal flip 50%
-        mosaic    = 1.0,       # Mosaic augmentation (combines 4 images)
-        degrees   = 10.0,      # Random rotation ±10°
+        mosaic    = 0.7,       # Mosaic helps generalization, but too much can distort actions
+        close_mosaic = 15,     # Finish training on natural-looking images
+        degrees   = 5.0,       # Small camera tilt variation
+        translate = 0.08,
+        scale     = 0.4,
         hsv_h     = 0.015,     # Hue shift (handles lighting variation)
-        hsv_s     = 0.7,       # Saturation shift
-        hsv_v     = 0.4,       # Brightness shift
+        hsv_s     = 0.5,       # Saturation shift
+        hsv_v     = 0.3,       # Brightness shift
 
-        # Early stopping — stops training if no improvement after 20 epochs
+        # Early stopping — stops training if validation does not improve
         patience  = 20,
 
         # Save best model weights automatically
